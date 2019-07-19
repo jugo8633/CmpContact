@@ -9,26 +9,31 @@ import common.Logs;
 
 public class ContactClient
 {
-    private final String IP = "127.0.0.1";
-    private final int PORT = 2019;
-    private final int SOCKET_CONNECT_SUCCESS = 0;
-    
+    private String IP;
+    private int PORT;
+    private boolean ASYNC;
+    private final int TIME_OUT = 15000;
     private Socket socket = null;
     
-    public ContactClient()
+    public ContactClient(final String strIP, final int nPort, final boolean bAsync)
     {
+        IP = strIP;
+        PORT = nPort;
+        ASYNC = bAsync;
     }
     
-    public void start()
+    public int start()
     {
         stop();
         socket = new Socket();
         
-        Logs.showTrace("[ContactClient] start Socket Created");
-        Thread thread = new Thread(new SocketConnect(socket));
-        thread.start();
+        if (ASYNC)
+        {
+            new Thread(new SocketConnect(socket)).start();
+            return 0;
+        }
+        return socketConnect(socket);
     }
-    
     
     public void stop()
     {
@@ -50,11 +55,40 @@ public class ContactClient
     {
         if (Controller.validSocket(socket))
         {
-            Thread thread = new Thread(new SocketSend(socket, handler, jsonObject.toString()));
-            thread.start();
+            if (ASYNC)
+            {
+                Thread thread = new Thread(new SocketSend(socket, jsonObject.toString()));
+                thread.start();
+                return;
+            }
+            
+            
         }
     }
     
+    private int socketConnect(Socket socket)
+    {
+        int nResult = 0;
+        try
+        {
+            socket.connect(new InetSocketAddress(IP, PORT), TIME_OUT);
+            socket.setSoTimeout(TIME_OUT);
+            Logs.showTrace("[ContactClient] SocketConnect : " + socket.isConnected());
+        }
+        catch (Exception e)
+        {
+            nResult = -1;
+            Logs.showError("SocketConnect Exception: " + e.toString());
+        }
+        return nResult;
+    }
+    
+    private int socketSend(Socket socket)
+    {
+    
+    }
+    
+    //==================== Thread Runnable ===============================//
     private class SocketConnect implements Runnable
     {
         private Socket theSocket = null;
@@ -67,20 +101,7 @@ public class ContactClient
         @Override
         public void run()
         {
-            try
-            {
-                // Socket Connect Timeout
-                int nConnectTimeOut = 15000;
-                theSocket.connect(new InetSocketAddress(IP, PORT), nConnectTimeOut);
-                // Socket Read IO Timeout
-                int nReceiveTimeOut = 15000;
-                theSocket.setSoTimeout(nReceiveTimeOut);
-                Logs.showTrace("[WheelPiesClient] SocketConnect : " + theSocket.isConnected());
-            }
-            catch (Exception e)
-            {
-                Logs.showError("SocketConnect Exception: " + e.toString());
-            }
+            socketConnect(theSocket);
         }
     }
     
@@ -104,13 +125,13 @@ public class ContactClient
                 if (theSocket.isConnected())
                 {
                     Controller.CMP_PACKET respPacket = new Controller.CMP_PACKET();
-                    nRespon = Controller.cmpRequest(Controller.semantic_request, theData,
+                    nRespon = Controller.cmpRequest(Controller.deidentify_request, theData,
                             respPacket, theSocket);
-                    Logs.showTrace("[SemanticClient] SocketSend Response Code: " + nRespon);
+                    Logs.showTrace("[ContactClient] SocketSend Response Code: " + nRespon);
                 }
                 else
                 {
-                    Logs.showError("[SemanticClient] SocketSend Socket is not connect");
+                    Logs.showError("[ContactClient] SocketSend Socket is not connect");
                 }
             }
             catch (Exception e)
@@ -119,20 +140,4 @@ public class ContactClient
             }
         }
     }
-    
-    @SuppressLint("HandlerLeak")
-    private Handler handler = new Handler()
-    {
-        @Override
-        public void handleMessage(Message msg)
-        {
-            switch (msg.what)
-            {
-                case SOCKET_CONNECT_SUCCESS:
-                    Logs.showTrace("Socket Connect Success");
-                    
-                    break;
-            }
-        }
-    };
 }

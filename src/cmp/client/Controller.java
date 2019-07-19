@@ -46,43 +46,30 @@ public abstract class Controller
     static public final int generic_nack = 0x80000000;
     static public final int bind_request = 0x00000001;
     static public final int bind_response = 0x80000001;
-    static public final int authentication_request = 0x00000002;
-    static public final int authentication_response = 0x80000002;
-    static public final int access_log_request = 0x00000003;
-    static public final int access_log_response = 0x80000003;
-    static public final int initial_request = 0x00000004;
-    static public final int initial_response = 0x80000004;
-    static public final int sign_up_request = 0x00000005;
-    static public final int sign_up_response = 0x80000005;
     static public final int unbind_request = 0x00000006;
     static public final int unbind_response = 0x80000006;
+    static public final int deidentify_request = 0x00000059;
+    static public final int deidentify_response = 0x80000059;
     
     
     /*
      * CMP status set
      */
     static final int STATUS_ROK = 0x00000000; // No Error
-    static public final int STATUS_RINVMSGLEN = 0x00000001; // Message Length is
-    // invalid
-    static public final int STATUS_RINVCMDLEN = 0x00000002; // Command Length is
-    // invalid
+    static public final int STATUS_RINVMSGLEN = 0x00000001; // Message Length is invalid
+    static public final int STATUS_RINVCMDLEN = 0x00000002; // Command Length is invalid
     static public final int STATUS_RINVCMDID = 0x00000003; // Invalid Command ID
-    static public final int STATUS_RINVBNDSTS = 0x00000004; // Incorrect BIND
-    // Status for given
-    // command
-    static public final int STATUS_RALYBND = 0x00000005; // Already in Bound
-    // State
+    static public final int STATUS_RINVBNDSTS = 0x00000004; // Incorrect BIND Status
+    static public final int STATUS_RALYBND = 0x00000005; // Already in Bound State
     static public final int STATUS_RSYSERR = 0x00000008; // System Error
     static public final int STATUS_RBINDFAIL = 0x00000010; // Bind Failed
-    static public final int STATUS_RINVBODY = 0x00000040; // Invalid Packet Body
-    // Data
-    static public final int STATUS_RINVCTRLID = 0x00000041; // Invalid
-    // Controller ID
+    static public final int STATUS_RINVBODY = 0x00000040; // Invalid Packet Body Data
+    static public final int STATUS_RINVCTRLID = 0x00000041; // Invalid Controller ID
     static public final int STATUS_RINVJSON = 0x00000042; // Invalid JSON Data
     
     private static int msnSequence = 0;
-    private static final int nConnectTimeOut = 3000; // Socket Connect Timeout
-    private static final int nReceiveTimeOut = 3000; // Socket Read IO Timeout
+    private static final int nConnectTimeOut = 3000; // Socket Connect Timeout million seconds
+    private static final int nReceiveTimeOut = 3000; // Socket Read IO Timeout million seconds
     
     public static final int ERR_CMP = -1000;
     public static final int ERR_PACKET_LENGTH = -6 + ERR_CMP;
@@ -120,7 +107,7 @@ public abstract class Controller
         return mstrLastError;
     }
     
-    /**
+    /** 同步模式
      * Controller Message Request Protocol
      *
      * @param nCommand   : CMP Command. Ref. CMP Document.
@@ -135,7 +122,7 @@ public abstract class Controller
     {
         if (null == respPacket)
         {
-            System.out.println("Parameter CMP_PACKET invalid");
+            Logs.showTrace("Parameter CMP_PACKET invalid");
             return ERR_INVALID_PARAM;
         }
         int nCmpStatus = STATUS_ROK;
@@ -164,13 +151,14 @@ public abstract class Controller
             buf.putInt(nSequence);
             
             // debug using start
+            /*
             Logs.showTrace("@@Request Command@@ ");
             Logs.showTrace("Command ID: " + String.valueOf(nCommand));
             Logs.showTrace("Command Length: " + String.valueOf(nLength));
             Logs.showTrace("Command Status: " + String.valueOf(STATUS_ROK));
             Logs.showTrace("Command Sequence: " + String.valueOf(nSequence));
             Logs.showTrace("Command Body: " + strBody);
-            
+            */
             
             if (null != strBody && 0 < strBody.length())
             {
@@ -205,7 +193,6 @@ public abstract class Controller
                 }
                 else
                 {
-                    
                     nCmpStatus = respPacket.cmpHeader.command_status;
                     int nBodySize = respPacket.cmpHeader.command_length - CMP_HEADER_SIZE;
                     
@@ -213,9 +200,7 @@ public abstract class Controller
                     {
                         buf.clear();
                         buf = ByteBuffer.allocate(nBodySize);
-                        nLength = inSocket.read(buf.array(), 0, --nBodySize); // not
-                        // read
-                        // end-char
+                        nLength = inSocket.read(buf.array(), 0, --nBodySize); // not read end-char
                         if (nLength == nBodySize)
                         {
                             byte[] bytes = new byte[nBodySize];
@@ -386,11 +371,7 @@ public abstract class Controller
     public static int cmpSend(final int nCommand, final String strBody, CMP_PACKET sendPacket,
             Socket msocket)
     {
-        
-        final int nSequence = getSequence();
-        return cmpSend(nCommand, strBody, sendPacket, msocket, nSequence);
-        
-        
+        return cmpSend(nCommand, strBody, sendPacket, msocket, getSequence());
     }
     
     public static int cmpReceive(CMP_PACKET receivePacket, Socket msocket, final int nSequence)
@@ -398,7 +379,6 @@ public abstract class Controller
         int nCmpStatus = STATUS_ROK;
         if (null == receivePacket)
         {
-            System.out.println("Parameter CMP_PACKET invalid");
             return ERR_INVALID_PARAM;
         }
         
@@ -431,7 +411,6 @@ public abstract class Controller
                     if (receivePacket.cmpHeader.sequence_number != nSequence)
                     {
                         return ERR_PACKET_SEQUENCE;
-                        
                     }
                 }
                 nCmpStatus = receivePacket.cmpHeader.command_status;
@@ -441,9 +420,7 @@ public abstract class Controller
                 {
                     buf.clear();
                     buf = ByteBuffer.allocate(nBodySize);
-                    nLength = inSocket.read(buf.array(), 0, --nBodySize); // not
-                    // read
-                    // end-char
+                    nLength = inSocket.read(buf.array(), 0, --nBodySize); // not read end-char
                     if (nLength == nBodySize)
                     {
                         byte[] bytes = new byte[nBodySize];
@@ -490,11 +467,9 @@ public abstract class Controller
         {
             nCmpStatus = ERR_EXCEPTION;
             Logs.showError(e.toString());
-            
         }
         
         return nCmpStatus;
-        
     }
     
 }
