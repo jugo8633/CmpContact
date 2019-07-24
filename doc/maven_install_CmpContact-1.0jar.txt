@@ -1,0 +1,9 @@
+# 將 CmpContact-1.0.jar 加到 Maven Local Responsity ( 因為package時 才會包入 ), 指令如下
+mvn install:install-file -Dfile=CmpContact-1.0.jar -DgroupId=cmp.client -DartifactId=CmpContact -Dversion=1.0 -Dpackaging=jar
+
+＃在專案 pom.xml 加入下列腳本
+<dependency>
+   <groupId>cmp.client</groupId>
+   <artifactId>CmpContact</artifactId>
+   <version>1.0</version>
+</dependency>

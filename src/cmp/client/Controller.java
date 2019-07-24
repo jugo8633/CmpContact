@@ -26,18 +26,18 @@ public abstract class Controller
      */
     static public class CMP_HEADER
     {
-        int command_length;
-        int command_id;
-        int command_status;
-        int sequence_number;
+        public int command_length;
+        public int command_id;
+        public int command_status;
+        public int sequence_number;
     }
     
     static final private int CMP_HEADER_SIZE = 16;
     
-    static class CMP_PACKET
+    static public class CMP_PACKET
     {
-        CMP_HEADER cmpHeader = new CMP_HEADER();
-        String cmpBody;
+        public CMP_HEADER cmpHeader = new CMP_HEADER();
+        public String cmpBody;
     }
     
     /*
@@ -107,7 +107,8 @@ public abstract class Controller
         return mstrLastError;
     }
     
-    /** 同步模式
+    /**
+     * 同步模式
      * Controller Message Request Protocol
      *
      * @param nCommand   : CMP Command. Ref. CMP Document.

@@ -51,19 +51,20 @@ public class ContactClient
         }
     }
     
-    public void send(JSONObject jsonObject)
+    public int send(JSONObject jsonObject, Controller.CMP_PACKET respPacket)
     {
-        if (Controller.validSocket(socket))
+        if (Controller.validSocket(socket) && null != respPacket)
         {
             if (ASYNC)
             {
-                Thread thread = new Thread(new SocketSend(socket, jsonObject.toString()));
+                Thread thread = new Thread(new SocketSend(socket, jsonObject.toString(),
+                        respPacket));
                 thread.start();
-                return;
+                return 0;
             }
-            
-            
+            return socketSend(socket, jsonObject.toString(), respPacket);
         }
+        return -1;
     }
     
     private int socketConnect(Socket socket)
@@ -83,9 +84,28 @@ public class ContactClient
         return nResult;
     }
     
-    private int socketSend(Socket socket)
+    private int socketSend(Socket socket, String strData, Controller.CMP_PACKET respPacket)
     {
-    
+        int nRespon = Controller.STATUS_ROK;
+        try
+        {
+            if (socket.isConnected())
+            {
+                nRespon = Controller.cmpRequest(Controller.deidentify_request, strData,
+                        respPacket, socket);
+                Logs.showTrace("[ContactClient] socketSend Response Code: " + nRespon + " Data: " + respPacket.cmpBody);
+            }
+            else
+            {
+                Logs.showError("[ContactClient] socketSend Socket is not connect");
+            }
+        }
+        catch (Exception e)
+        {
+            nRespon = -1;
+            Logs.showError("SocketSend Exception: " + e.toString());
+        }
+        return nRespon;
     }
     
     //==================== Thread Runnable ===============================//
@@ -109,35 +129,19 @@ public class ContactClient
     {
         private Socket theSocket = null;
         private String theData = null;
+        private Controller.CMP_PACKET theRespPacket;
         
-        SocketSend(Socket socket, String strData)
+        SocketSend(Socket socket, String strData, Controller.CMP_PACKET respPacket)
         {
             theSocket = socket;
             theData = strData;
+            theRespPacket = respPacket;
         }
         
         @Override
         public void run()
         {
-            int nRespon = Controller.STATUS_ROK;
-            try
-            {
-                if (theSocket.isConnected())
-                {
-                    Controller.CMP_PACKET respPacket = new Controller.CMP_PACKET();
-                    nRespon = Controller.cmpRequest(Controller.deidentify_request, theData,
-                            respPacket, theSocket);
-                    Logs.showTrace("[ContactClient] SocketSend Response Code: " + nRespon);
-                }
-                else
-                {
-                    Logs.showError("[ContactClient] SocketSend Socket is not connect");
-                }
-            }
-            catch (Exception e)
-            {
-                Logs.showError("SocketSend Exception: " + e.toString());
-            }
+            socketSend(theSocket, theData, theRespPacket);
         }
     }
 }
