@@ -12,7 +12,10 @@ public class Main
         
         // socket server test
         ContactServer contactServer = ContactServer.getInstance();
-        contactServer.start(2310);
+        if(-1 != contactServer.start(2310))
+        {
+        
+        }
         // socket client test
         /*
         ContactClient contactClient = new ContactClient("127.0.0.1", 2310, false);

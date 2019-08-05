@@ -132,7 +132,7 @@ public class ContactServer
                     if (0 <= Controller.cmpReceive(receivePacket, theSocket, -1))
                     {
                         Logs.showTrace("Socket Receive:" + receivePacket.cmpBody);
-                        Controller.cmpSend(receivePacket.cmpH)
+                        Controller.cmpSend(receivePacket.cmpHeader.command_id)
                     }
                     else
                     {
