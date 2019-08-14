@@ -1,4 +1,4 @@
-package cmp.client;
+package common;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +55,7 @@ public abstract class Controller
     /*
      * CMP status set
      */
-    static final int STATUS_ROK = 0x00000000; // No Error
+    static public final int STATUS_ROK = 0x00000000; // No Error
     static public final int STATUS_RINVMSGLEN = 0x00000001; // Message Length is invalid
     static public final int STATUS_RINVCMDLEN = 0x00000002; // Command Length is invalid
     static public final int STATUS_RINVCMDID = 0x00000003; // Invalid Command ID
@@ -315,7 +315,10 @@ public abstract class Controller
             if (null != strBody && 0 < strBody.length())
             {
                 nLength += strBody.getBytes(CODE_TYPE).length + 1;
-                sendPacket.cmpBody = strBody;
+                if (null != sendPacket)
+                {
+                    sendPacket.cmpBody = strBody;
+                }
             }
             ByteBuffer buf = ByteBuffer.allocate(nLength);
             buf.putInt(nLength);
@@ -323,19 +326,14 @@ public abstract class Controller
             buf.putInt(nCmpStatus);
             buf.putInt(nSequence);
             
-            sendPacket.cmpHeader.command_id = nCommand;
-            sendPacket.cmpHeader.command_length = nLength;
-            sendPacket.cmpHeader.command_status = nCmpStatus;
-            sendPacket.cmpHeader.sequence_number = nSequence;
+            if (null != sendPacket)
+            {
+                sendPacket.cmpHeader.command_id = nCommand;
+                sendPacket.cmpHeader.command_length = nLength;
+                sendPacket.cmpHeader.command_status = nCmpStatus;
+                sendPacket.cmpHeader.sequence_number = nSequence;
+            }
             
-            /*
-             * // debug using start Logs.showTrace("@@Request Command@@ ");
-             * Logs.showTrace("Command ID: " + String.valueOf(nCommand));
-             * Logs.showTrace("Command Length: " + String.valueOf(nLength));
-             * Logs.showTrace("Command Status: " + String.valueOf(nCmpStatus));
-             * Logs.showTrace("Command Sequence: " + String.valueOf(nSequence));
-             * Logs.showTrace("Command Body: " + strBody); // debug using end
-             */
             if (null != strBody && 0 < strBody.length())
             {
                 buf.put(strBody.getBytes(CODE_TYPE));

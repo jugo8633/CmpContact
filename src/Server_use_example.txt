@@ -23,7 +23,6 @@ public class Main
         @Override
         public void onReceive(String strData)
         {
-            
             System.out.println("Command: " + strData);
         }
     };

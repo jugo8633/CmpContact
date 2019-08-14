@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import common.Controller;
 import common.Logs;
 
 public class ContactClient

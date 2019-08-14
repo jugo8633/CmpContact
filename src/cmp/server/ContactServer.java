@@ -1,17 +1,13 @@
 package cmp.server;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import org.json.JSONObject;
+
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
-import cmp.client.ContactClient;
-import cmp.client.Controller;
+import common.Controller;
 import common.Logs;
+
 
 /**
  * Created by Jugo on 2019/7/24
@@ -22,6 +18,17 @@ public class ContactServer
     private volatile boolean mbRun = false;
     private static ContactServer instance = null;
     private ServerSocket serverSocket = null;
+    private ContactServer.ReceiveListener receiveListener = null;
+    
+    public static interface ReceiveListener
+    {
+        public void onReceive(String strData);
+    }
+    
+    public void setReceiveListener(ContactServer.ReceiveListener listener)
+    {
+        receiveListener = listener;
+    }
     
     private ContactServer()
     {
@@ -131,8 +138,12 @@ public class ContactServer
                     Controller.CMP_PACKET receivePacket = new Controller.CMP_PACKET();
                     if (0 <= Controller.cmpReceive(receivePacket, theSocket, -1))
                     {
-                        Logs.showTrace("Socket Receive:" + receivePacket.cmpBody);
-                        Controller.cmpSend(receivePacket.cmpHeader.command_id)
+                       // Logs.showTrace("Socket Receive:" + receivePacket.cmpBody);
+                        Controller.cmpSend(Controller.deidentify_response, null, null, theSocket);
+                        if(null != receiveListener)
+                        {
+                            receiveListener.onReceive(receivePacket.cmpBody);
+                        }
                     }
                     else
                     {
