@@ -7,10 +7,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="12703553-29e0-4fac-9cbb-d35256aca5d2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cmp/server/ContactServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/cmp/server/ContactServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Controller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server_use_example.txt" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -34,6 +31,7 @@
   <component name="ProjectId" id="1Oiel6iNas6oVVnzDcspX92Ux10" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../CmpContactExample" />
     <property name="project.structure.last.edited" value="Artifacts" />
