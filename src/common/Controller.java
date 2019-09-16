@@ -48,8 +48,12 @@ public abstract class Controller
     static public final int bind_response = 0x80000001;
     static public final int unbind_request = 0x00000006;
     static public final int unbind_response = 0x80000006;
-    static public final int deidentify_request = 0x00000059;
+    static public final int deidentify_request  = 0x00000059;
     static public final int deidentify_response = 0x80000059;
+    static public final int status_request  = 0x00000060;
+    static public final int status_response = 0x80000060;
+    static public final int option_request  = 0x00000061;
+    static public final int option_response = 0x80000061;
     
     
     /*
@@ -284,19 +288,8 @@ public abstract class Controller
     }
     
     /*
-     * public static int cmpRequestNew(final int nCommand, final String strBody,
-     * CMP_PACKET respPacket, Socket msocket) { CMP_PACKET sendPacket = new
-     * CMP_PACKET();
-     *
-     * int sendStatus = cmpSend(nCommand, strBody, sendPacket, msocket); if
-     * (sendStatus == STATUS_ROK) { cmpReceive(respPacket, msocket,
-     * sendPacket.cmpHeader.sequence_number);
-     *
-     * } else { return sendStatus; }
-     *
-     * }
-     */
-    
+    * 非同步模式
+    * */
     public static int cmpSend(final int nCommand, final String strBody, CMP_PACKET sendPacket,
             Socket msocket, final int nSequence)
     {

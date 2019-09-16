@@ -18,17 +18,40 @@ public class ContactServer
     private volatile boolean mbRun = false;
     private static ContactServer instance = null;
     private ServerSocket serverSocket = null;
-    private ContactServer.ReceiveListener receiveListener = null;
+    private ContactServer.ReceiveListener receiveListener = null; // 去識別
+    private ContactServer.StatusListener statusListener = null; // 狀態
+    private ContactServer.OptionListener optionListener = null; // 操作
     
     public static interface ReceiveListener
     {
         public void onReceive(String strData);
     }
     
+    public static interface StatusListener
+    {
+        public String onStatus(String strData);
+    }
+    
+    public static interface OptionListener
+    {
+        public void onOption(String strData);
+    }
+    
     public void setReceiveListener(ContactServer.ReceiveListener listener)
     {
         receiveListener = listener;
     }
+    
+    public void setStatusListener(ContactServer.StatusListener listener)
+    {
+        statusListener = listener;
+    }
+    
+    public void setOptionListener(ContactServer.OptionListener listener)
+    {
+        optionListener = listener;
+    }
+    
     
     private ContactServer()
     {
@@ -90,6 +113,12 @@ public class ContactServer
         new Thread(new SocketReceive(socket)).start();
     }
     
+    public void send(final int nCommand, final String strBody, Socket msocket, final int nSequence)
+    {
+        Controller.cmpSend(nCommand, strBody, null, msocket,nSequence);
+    }
+    
+    
     //=============================== Thread Run ==========================================//
     
     private class SocketAccept implements Runnable
@@ -138,11 +167,33 @@ public class ContactServer
                     Controller.CMP_PACKET receivePacket = new Controller.CMP_PACKET();
                     if (0 <= Controller.cmpReceive(receivePacket, theSocket, -1))
                     {
-                       // Logs.showTrace("Socket Receive:" + receivePacket.cmpBody);
-                        Controller.cmpSend(Controller.deidentify_response, null, null, theSocket);
-                        if(null != receiveListener)
+                        String strStatus;
+                        
+                        switch(receivePacket.cmpHeader.command_id)
                         {
-                            receiveListener.onReceive(receivePacket.cmpBody);
+                            case Controller.deidentify_request:
+                                Controller.cmpSend(Controller.deidentify_response, null, null, theSocket);
+                                if(null != receiveListener)
+                                {
+                                    receiveListener.onReceive(receivePacket.cmpBody);
+                                }
+                                break;
+                            case Controller.status_request:
+                                strStatus = "";
+                                if(null != statusListener)
+                                {
+                                    strStatus = statusListener.onStatus(receivePacket.cmpBody);
+                                }
+                                Controller.cmpSend(Controller.status_response, strStatus, null,
+                                        theSocket);
+                                break;
+                            case Controller.option_request:
+                                Controller.cmpSend(Controller.option_response, null, null, theSocket);
+                                if(null != optionListener)
+                                {
+                                    optionListener.onOption(receivePacket.cmpBody);
+                                }
+                                break;
                         }
                     }
                     else
