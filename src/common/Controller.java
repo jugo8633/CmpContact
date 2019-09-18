@@ -1,5 +1,6 @@
 package common;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -382,7 +383,6 @@ public abstract class Controller
         try
         {
             InputStream inSocket = msocket.getInputStream();
-            
             ByteBuffer buf = ByteBuffer.allocate(CMP_HEADER_SIZE);
             
             // Receive Response
@@ -407,23 +407,43 @@ public abstract class Controller
                 }
                 nCmpStatus = receivePacket.cmpHeader.command_status;
                 int nBodySize = receivePacket.cmpHeader.command_length - CMP_HEADER_SIZE;
-                
+                //Logs.showTrace("body size = " + nBodySize);
+                buf.clear();
                 if (0 < nBodySize)
                 {
+                    byte []b4 = new byte[nBodySize];
+                    new DataInputStream(msocket.getInputStream()).readFully(b4);
+                    receivePacket.cmpBody = new String(b4, Charset.forName(CODE_TYPE));
+                    nLength = receivePacket.cmpBody.length();
+                    Logs.showTrace("body size = " + nBodySize + " read size = " + nLength);
+                    if (nLength != nBodySize)
+                    {
+                        Logs.showTrace("read Length != nBodySize");
+                    //    nCmpStatus = ERR_PACKET_LENGTH;
+                    }
+                    /*
                     buf.clear();
                     buf = ByteBuffer.allocate(nBodySize);
-                    nLength = inSocket.read(buf.array(), 0, --nBodySize); // not read end-char
+                    nLength = inSocket.read(buf.array(), 0, nBodySize); // not read end-char
+                    Logs.showTrace("read size = " + nLength);
                     if (nLength == nBodySize)
                     {
                         byte[] bytes = new byte[nBodySize];
                         buf.get(bytes);
                         receivePacket.cmpBody = new String(bytes, Charset.forName(CODE_TYPE));
                     }
+                    else
+                    {
+                        Logs.showTrace("read Length != nBodySize");
+                        nCmpStatus = ERR_PACKET_LENGTH;
+                    }
                     buf.clear();
+                    */
                 }
                 
                 // for debugging use Start
-				/*Logs.showTrace("@@Response Command@@ ");
+                /*
+				Logs.showTrace("@@Response Command@@ ");
 				Logs.showTrace("Command ID: " + String.valueOf(receivePacket.cmpHeader
 				.command_id));
 				Logs.showTrace("Command Length: " + String.valueOf(receivePacket.cmpHeader
@@ -436,7 +456,9 @@ public abstract class Controller
 				if (null != receivePacket.cmpBody)
 				{
 					Logs.showTrace("Response Message: " + receivePacket.cmpBody);
-				}*/
+				}
+				*/
+                
                 // for debugging use End
             }
             else

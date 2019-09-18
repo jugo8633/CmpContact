@@ -79,6 +79,7 @@ public class ContactServer
         try
         {
             serverSocket = new ServerSocket(nPort);
+            serverSocket.setReceiveBufferSize(1024 * 1024);
             mbRun = true;
             new Thread(new SocketAccept()).start();
         }
@@ -172,11 +173,11 @@ public class ContactServer
                         switch(receivePacket.cmpHeader.command_id)
                         {
                             case Controller.deidentify_request:
-                                Controller.cmpSend(Controller.deidentify_response, null, null, theSocket);
                                 if(null != receiveListener)
                                 {
                                     receiveListener.onReceive(receivePacket.cmpBody);
                                 }
+                                Controller.cmpSend(Controller.deidentify_response, null, null, theSocket);
                                 break;
                             case Controller.status_request:
                                 strStatus = "";
@@ -198,6 +199,8 @@ public class ContactServer
                     }
                     else
                     {
+                        theSocket.shutdownInput();
+                        theSocket.shutdownOutput();
                         theSocket.close();
                         Logs.showTrace("Socket Close");
                         break;
