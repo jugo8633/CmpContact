@@ -6,8 +6,6 @@ public class Main
 {
     public static void main(String[] args)
     {
-        System.out.println("Hello World!");
-        
         // socket server test
         ContactServer contactServer = ContactServer.getInstance();
         if (-1 != contactServer.start(1414))

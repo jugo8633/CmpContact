@@ -52,18 +52,33 @@ public class ContactClient
         }
     }
     
-    public int send(JSONObject jsonObject, Controller.CMP_PACKET respPacket)
+    public int status(Controller.CMP_PACKET respPacket)
+    {
+        return socketSend(socket, null, respPacket,Controller.status_request);
+    }
+    
+    public int deidentify(JSONObject jsonObject, Controller.CMP_PACKET respPacket)
+    {
+        return socketSend(socket, jsonObject.toString(), respPacket,Controller.deidentify_request);
+    }
+    
+    public int option(JSONObject jsonObject, Controller.CMP_PACKET respPacket)
+    {
+        return socketSend(socket, jsonObject.toString(), respPacket,Controller.option_request);
+    }
+    
+    public int send(JSONObject jsonObject, Controller.CMP_PACKET respPacket,int nCommandId)
     {
         if (Controller.validSocket(socket) && null != respPacket)
         {
             if (ASYNC)
             {
                 Thread thread = new Thread(new SocketSend(socket, jsonObject.toString(),
-                        respPacket));
+                        respPacket,nCommandId));
                 thread.start();
                 return 0;
             }
-            return socketSend(socket, jsonObject.toString(), respPacket);
+            return socketSend(socket, jsonObject.toString(), respPacket,nCommandId);
         }
         return -1;
     }
@@ -85,14 +100,15 @@ public class ContactClient
         return nResult;
     }
     
-    private int socketSend(Socket socket, String strData, Controller.CMP_PACKET respPacket)
+    private int socketSend(Socket socket, String strData, Controller.CMP_PACKET respPacket,
+            int nCommandId)
     {
         int nRespon = Controller.STATUS_ROK;
         try
         {
             if (socket.isConnected())
             {
-                nRespon = Controller.cmpRequest(Controller.deidentify_request, strData,
+                nRespon = Controller.cmpRequest(nCommandId, strData,
                         respPacket, socket);
                 Logs.showTrace("[ContactClient] socketSend Response Code: " + nRespon + " Data: " + respPacket.cmpBody);
             }
@@ -108,6 +124,11 @@ public class ContactClient
         }
         return nRespon;
     }
+    
+//    private int socketSend(Socket socket, String strData, Controller.CMP_PACKET respPacket)
+//    {
+//        return socketSend(socket,strData,respPacket,Controller.deidentify_request);
+//    }
     
     //==================== Thread Runnable ===============================//
     private class SocketConnect implements Runnable
@@ -128,21 +149,23 @@ public class ContactClient
     
     private class SocketSend implements Runnable
     {
+        private int theCommandId;
         private Socket theSocket = null;
         private String theData = null;
         private Controller.CMP_PACKET theRespPacket;
         
-        SocketSend(Socket socket, String strData, Controller.CMP_PACKET respPacket)
+        SocketSend(Socket socket, String strData, Controller.CMP_PACKET respPacket,int nCommandId)
         {
             theSocket = socket;
             theData = strData;
             theRespPacket = respPacket;
+            theCommandId = nCommandId;
         }
         
         @Override
         public void run()
         {
-            socketSend(theSocket, theData, theRespPacket);
+            socketSend(theSocket, theData, theRespPacket,theCommandId);
         }
     }
 }

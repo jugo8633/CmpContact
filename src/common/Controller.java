@@ -407,7 +407,6 @@ public abstract class Controller
                 }
                 nCmpStatus = receivePacket.cmpHeader.command_status;
                 int nBodySize = receivePacket.cmpHeader.command_length - CMP_HEADER_SIZE;
-                //Logs.showTrace("body size = " + nBodySize);
                 buf.clear();
                 if (0 < nBodySize)
                 {

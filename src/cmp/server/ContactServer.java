@@ -4,6 +4,7 @@ import org.json.JSONObject;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 
 import common.Controller;
 import common.Logs;
@@ -121,7 +122,6 @@ public class ContactServer
     
     
     //=============================== Thread Run ==========================================//
-    
     private class SocketAccept implements Runnable
     {
         SocketAccept()
@@ -169,15 +169,16 @@ public class ContactServer
                     if (0 <= Controller.cmpReceive(receivePacket, theSocket, -1))
                     {
                         String strStatus;
-                        
+                        if(null != receivePacket.cmpBody)
+                            receivePacket.cmpBody = receivePacket.cmpBody.trim();
                         switch(receivePacket.cmpHeader.command_id)
                         {
                             case Controller.deidentify_request:
+                                Controller.cmpSend(Controller.deidentify_response, null, null, theSocket);
                                 if(null != receiveListener)
                                 {
                                     receiveListener.onReceive(receivePacket.cmpBody);
                                 }
-                                Controller.cmpSend(Controller.deidentify_response, null, null, theSocket);
                                 break;
                             case Controller.status_request:
                                 strStatus = "";
@@ -185,8 +186,9 @@ public class ContactServer
                                 {
                                     strStatus = statusListener.onStatus(receivePacket.cmpBody);
                                 }
+                                Logs.showTrace("send status_response data = " + strStatus);
                                 Controller.cmpSend(Controller.status_response, strStatus, null,
-                                        theSocket);
+                                        theSocket,receivePacket.cmpHeader.sequence_number);
                                 break;
                             case Controller.option_request:
                                 Controller.cmpSend(Controller.option_response, null, null, theSocket);
