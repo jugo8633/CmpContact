@@ -204,15 +204,25 @@ public abstract class Controller
                     
                     if (0 < nBodySize)
                     {
-                        buf.clear();
-                        buf = ByteBuffer.allocate(nBodySize);
-                        nLength = inSocket.read(buf.array(), 0, --nBodySize); // not read end-char
-                        if (nLength == nBodySize)
+                        byte []b4 = new byte[nBodySize];
+                        new DataInputStream(msocket.getInputStream()).readFully(b4);
+                        respPacket.cmpBody = new String(b4, Charset.forName(CODE_TYPE));
+                        nLength = respPacket.cmpBody.length();
+                        Logs.showTrace("body size = " + nBodySize + " read size = " + nLength);
+                        if (nLength != nBodySize)
                         {
-                            byte[] bytes = new byte[nBodySize];
-                            buf.get(bytes);
-                            respPacket.cmpBody = new String(bytes, Charset.forName(CODE_TYPE));
+                            Logs.showTrace("read Length != nBodySize");
+                            //    nCmpStatus = ERR_PACKET_LENGTH;
                         }
+//                        buf.clear();
+//                        buf = ByteBuffer.allocate(nBodySize);
+//                        nLength = inSocket.read(buf.array(), 0, --nBodySize); // not read end-char
+//                        if (nLength == nBodySize)
+//                        {
+//                            byte[] bytes = new byte[nBodySize];
+//                            buf.get(bytes);
+//                            respPacket.cmpBody = new String(bytes, Charset.forName(CODE_TYPE));
+//                        }
                     }
                 }
             }

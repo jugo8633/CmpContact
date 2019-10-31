@@ -8,9 +8,7 @@
   <component name="ChangeListManager">
     <list default="true" id="12703553-29e0-4fac-9cbb-d35256aca5d2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cmp/client/ContactClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/cmp/client/ContactClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cmp/server/ContactServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/cmp/server/ContactServer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/common/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Controller.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -41,6 +39,7 @@
     <property name="project.structure.last.edited" value="Artifacts" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">

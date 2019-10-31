@@ -13,7 +13,7 @@ public class ContactClient
     private String IP;
     private int PORT;
     private boolean ASYNC;
-    private final int TIME_OUT = 15000;
+    private final int TIME_OUT = 30000;
     private Socket socket = null;
     
     public ContactClient(final String strIP, final int nPort, final boolean bAsync)
